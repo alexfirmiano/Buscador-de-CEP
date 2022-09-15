@@ -2,12 +2,30 @@ import { useState } from 'react';
 import { FiSearch } from 'react-icons/fi';
 import './styles.css';
 
+import api from './services/api';
+
 function App() {
 
-  const [input, setInput] = useState('')
+  const [input, setInput] = useState('') //Passando o valor parte este estado - setInput.
+  const [cep, setCep] = useState({})
 
-  function handleSearch() {
-    alert("VALOR DO INPUT " + input)
+  async function handleSearch() {
+    //https://viacep.com.br/ws/
+    
+    if(input === '') {
+      alert("Favor preencher o CEP desejado!")
+      return;
+    }
+    try {
+      const response = await api.get(`${input}/json`);
+      setCep(response.data)
+      setInput("");
+
+    }catch {
+      alert("CEP inválido!");
+      setInput("")
+    }
+
   }
 
   return (
@@ -19,7 +37,7 @@ function App() {
         type="text" 
         placeholder="Digite seu CEP aqui..."
         value={input}
-        onChange={(e) => setInput(e.target.value) }
+        onChange={(e) => setInput(e.target.value) } //Pegando o valor que foi digitado - setInput(e.target.value)
         />
 
         <button className="buttonSearch" onClick={handleSearch}>
@@ -27,14 +45,16 @@ function App() {
         </button>
       </div>
 
-      <main className="main">
-        <h2>CEP: 25935-087</h2>
-
-        <span>Rua Testando informações</span>
-        <span>Complemento: info qualquer</span>
-        <span>Centro</span>
-        <span>Rio de Janeiro - RJ</span>
-      </main>
+      {Object.keys(cep).length > 0 && (
+        <main className="main">
+          <h2>CEP: {cep.cep}</h2>
+      
+          <span>{cep.logradouro}</span>
+          <span>Complemento: {cep.complemento}</span>
+          <span>{cep.bairro}</span>
+          <span>{cep.localidade} - {cep.uf}</span>
+        </main>
+      )}
 
     </div>
   );
